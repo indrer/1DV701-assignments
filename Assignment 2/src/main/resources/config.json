@@ -1,0 +1,7 @@
+{
+	"resource": "",
+	"forbidden": ["/admin"],
+	"redir": {
+				"/temporary" : "/temp"
+			}
+}

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <title>Requesto - Your guide to the amazing world of HTTP! In your local browser now!</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        h4 {
+            margin-bottom: 10px;
+            font-family: sans-serif;
+        }
+        .container {
+            float:left;
+            padding:15px;
+            width:100%;
+            box-sizing:border-box;
+        }
+
+        #url {
+            width:300px;
+        }
+
+        #btn {
+            margin:15px;
+        }
+
+        #result {
+            display: none;
+            background: #ececec;
+            border-radius: 5px;
+            border: 1px solid #d7d7d7;
+            padding: 30px;
+            margin: 15px;
+        }
+    </style>
+
+    <script type="text/javascript">
+    var btn, select, selectedMethod, result;
+
+    /*
+     * Init function
+     */
+    function init() {
+        btn = document.getElementById("btn");
+        select = document.getElementById("methodSelect");
+        result = document.getElementById("result");
+        switchMethod(null);
+
+        select.addEventListener("change", switchMethod, false);
+
+        btn.addEventListener("click", function() {
+            if (selectedMethod == "POST" || selectedMethod == "PUT") {
+            	var file = document.getElementById("data").value.split("\\");
+            	var lengthOfPath = file.length;
+            	file = file[lengthOfPath-1];
+                XHR(selectedMethod, document.getElementById("url").value + "/" + file, document.getElementById("data").files[0]);
+            } else {
+                XHR(selectedMethod, document.getElementById("url").value, null);
+            }
+        }, false);
+    };
+    window.addEventListener("load", init, false);
+
+    /*
+     * Switch selected method
+     */
+    function switchMethod(event) {
+        selectedMethod = select.options[select.selectedIndex].value;
+        if ((selectedMethod == "POST" || selectedMethod == "PUT") && !(document.getElementById("data"))) {
+            var el = document.createElement("input");
+            el.type = "file";
+            el.id = "data";
+            el.placeholder = "data..";
+            var title = document.createElement("h4");
+            title.textContent = "Data:";
+            document.getElementById("inputFields").appendChild(title);
+            document.getElementById("inputFields").appendChild(el);
+        } else if (selectedMethod == "GET") {
+            document.getElementById("inputFields").innerHTML = '<h4>URL:</h4><input type="text" id="url" placeholder="test.json"><br>';
+        }
+    };
+
+    /*
+     * XMLHttpRequest
+     */
+    function XHR(method, url, data) {
+        var fileData = data || null;
+        var xhr = new XMLHttpRequest();
+        xhr.open(method, url, true);
+        xhr.addEventListener("load", function() {
+            if(xhr.readyState == 4) {
+                receive(xhr.response);
+                return xhr.response;
+            }  else {
+                console.error("Something went wrong..", xhr);
+            }
+        });
+        if (fileData) {
+            xhr.send(fileData);
+        } else {
+            xhr.send(null);
+        }
+    }
+
+    function receive(response) {
+        result.style.display = "block";
+        result.textContent = response;
+    }
+    </script>
+
+</head>
+<body>
+    <div class="container">
+        <h4>Method:</h4>
+        <select name="method" id="methodSelect">
+            <option selected="true" value="POST">POST</option>
+            <option value="PUT">PUT</option>
+        </select>
+        <div id="inputFields">
+            <h4>URL:</h4>
+            <input type="text" id="url" placeholder="test.json"><br> 
+        </div>
+    </div>
+    <br>
+    <input type="submit" id="btn" value="Request">
+
+    <div><pre id="result"></pre></div>
+</body>
+</html>
